@@ -42,7 +42,7 @@ public static class Program {
 			.MinimumLevel.Override("Microsoft.Hosting.Lifetime", Serilog.Events.LogEventLevel.Information)
 #endif
 			.WriteTo.Console(
-				outputTemplate: "[{Level} {Timestamp:HH:mm:ss.fff} {Thread}]" + (name == null ? "" : $" [{name}]") + " {Message:lj}{NewLine}{Exception}"
+				outputTemplate: "[{Level:u4} {Timestamp:HH:mm:ss.fff} {Thread}]" + (name == null ? "" : $" [{name}]") + " {Message:lj}{NewLine}{Exception}"
 			)
 			.WriteTo.FileEx(
 				path: Path.Combine(Settings.Instance.LogPath, (name ?? "server") + ".log"),
