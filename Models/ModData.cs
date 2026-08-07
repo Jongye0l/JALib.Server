@@ -299,5 +299,6 @@ public class ModData : IJsonData {
 			}
 			writer.WriteEndObject();
 		}
+		writer.WriteEndObject();
 	}
 }
