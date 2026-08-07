@@ -124,7 +124,11 @@ public class JALibController : ControllerBase {
 			}
 
 			if(ver.IsNull()) return NotFound();
-			return Redirect(modData.DownloadLink.GetLink(ver));
+
+			string? dl = modData.DownloadLink.GetLink(ver);
+			if(dl == null) return NotFound();
+
+			return Redirect(dl);
 		} catch (Exception ex) {
 			_logger.LogError(ex, "Error processing downloadMod");
 			return StatusCode(500, "Internal Server Error");

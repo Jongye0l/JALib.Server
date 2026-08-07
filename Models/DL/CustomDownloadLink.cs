@@ -8,7 +8,7 @@ namespace JALib.Server.Models.DL;
 public class CustomDownloadLink : DownloadLink {
 	public Dictionary<VersionStruct, string> Links = new();
 
-	public override string GetLink(VersionStruct version) => Links[version];
+	public override string? GetLink(VersionStruct version) => Links.GetValueOrDefault(version);
 
 	public override void WriteTo(JavaByteArrayDataOutput output) {
 		output.WriteByte(1);

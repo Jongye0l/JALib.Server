@@ -27,7 +27,7 @@ public abstract class DownloadLink : IJsonData {
 		}
 	}
 
-	public abstract string GetLink(VersionStruct version);
+	public abstract string? GetLink(VersionStruct version);
 	public abstract void WriteTo(JavaByteArrayDataOutput output);
 	public abstract void Load(ref Utf8JsonReader reader);
 	public abstract void Save(Utf8JsonWriter writer);
