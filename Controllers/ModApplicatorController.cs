@@ -1,3 +1,4 @@
+using JALib.Server.Helpers;
 using JALib.Server.Models;
 using JALib.Server.Views.ModApplicator;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +16,7 @@ public class ModApplicatorController : Controller {
 
 	[HttpGet("modApplicator/{name}/{version}")]
 	public IActionResult ModApplicator(string name, string version, [FromHeader(Name = "Accept-Language")] string? langHeader, [FromHeader(Name = "User-Agent")] string? userAgent) {
-		_logger.LogInformation("ModApplicator: {Name} {Version}", name, version);
+		_logger.LogInformation("[{Ip}] ModApplicator: {Name} {Version}", HttpContext.GetClientIp(), name, version);
 		bool isKorean = langHeader != null && (langHeader.Contains("ko") || langHeader.Contains("KR"));
 		string lang = isKorean ? "ko" : "en";
 

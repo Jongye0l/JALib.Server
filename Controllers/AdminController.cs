@@ -23,10 +23,10 @@ public class AdminController(ILogger<AdminController> logger) : ControllerBase {
 
 		using JavaByteArrayDataInput input = new(gZipStream);
 		string name = input.ReadUTF()!;
-		logger.LogInformation("Add ModData: {Name}", name);
+		logger.LogInformation("[{Ip}] Add ModData: {Name}", HttpContext.GetClientIp(), name);
 
 		ModData.CreateMod(name, input);
-		logger.LogInformation("Complete Add ModData: {Name}", name);
+		logger.LogInformation("[{Ip}] Complete Add ModData: {Name}", HttpContext.GetClientIp(), name);
 
 		return Ok("Complete Add ModData");
 	}
@@ -84,7 +84,7 @@ public class AdminController(ILogger<AdminController> logger) : ControllerBase {
 	public IActionResult GetModData() {
 		if(!CheckPermission()) return Unauthorized();
 
-		logger.LogInformation("Get ModData");
+		logger.LogInformation("[{Ip}] Get ModData", HttpContext.GetClientIp());
 		List<ModData> list = ModData.GetModDataList();
 		JavaByteArrayDataOutput output = new(true);
 

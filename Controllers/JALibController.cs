@@ -22,7 +22,7 @@ public class JALibController : ControllerBase {
 
 	[HttpGet("modInfo/{name}/{version}/{beta:int}")]
 	public IActionResult GetModInfo(string name, string version, int beta) {
-		_logger.LogInformation("GetModInfo: {Name} {Version}, beta: {Beta}", name, version, beta == 1);
+		_logger.LogInformation("[{Ip}] GetModInfo: {Name} {Version}, beta: {Beta}", HttpContext.GetClientIp(), name, version, beta == 1);
 		ModData? modData = ModData.GetModData(name);
 		JavaByteArrayDataOutput output = new();
 
@@ -47,7 +47,7 @@ public class JALibController : ControllerBase {
 
 	[HttpGet("modInfoV2/{name}/{version}")]
 	public IActionResult GetModInfoV2(string name, string version) {
-		_logger.LogInformation("GetModInfo(V2): {Name} {Version}, beta: null", name, version);
+		_logger.LogInformation("[{Ip}] GetModInfo(V2): {Name} {Version}, beta: null", HttpContext.GetClientIp(), name, version);
 		ModData? modData = ModData.GetModData(name);
 		if(modData == null) return NotFound();
 
@@ -63,7 +63,7 @@ public class JALibController : ControllerBase {
 
 	[HttpGet("modInfoV2/{name}/{version}/{beta}")]
 	public IActionResult GetModInfoV2(string name, string version, int beta) {
-		_logger.LogInformation("GetModInfo(V2): {Name} {Version}, beta: {Beta}", name, version, beta == 1);
+		_logger.LogInformation("[{Ip}] GetModInfo(V2): {Name} {Version}, beta: {Beta}", HttpContext.GetClientIp(), name, version, beta == 1);
 		ModData? modData = ModData.GetModData(name);
 		if(modData == null) return NotFound();
 
@@ -105,7 +105,7 @@ public class JALibController : ControllerBase {
 	[HttpGet("downloadMod/{name}/{version}")]
 	public IActionResult DownloadMod(string name, string version) {
 		try {
-			_logger.LogInformation("DownloadMod: {Name} {Version}", name, version);
+			_logger.LogInformation("[{Ip}] DownloadMod: {Name} {Version}", HttpContext.GetClientIp(), name, version);
 
 			ModData? modData = ModData.GetModData(name);
 			if(modData == null) return NotFound();
@@ -133,20 +133,20 @@ public class JALibController : ControllerBase {
 
 	[HttpGet("ping")]
 	public string Ping() {
-		_logger.LogInformation("ping!");
+		_logger.LogInformation("[{Ip}] ping!", HttpContext.GetClientIp());
 		return "pong!";
 	}
 
 	[HttpGet("reloadToken")]
 	public string ReloadToken() {
-		_logger.LogInformation("reloading Token..");
+		_logger.LogInformation("[{Ip}] reloading Token..", HttpContext.GetClientIp());
 		TokenData.LoadToken(Settings.Instance.TokenPath);
 		return "Token reloaded!";
 	}
 
 	[HttpGet("autoInstaller/{version}")]
 	public IActionResult AutoInstaller(string version) {
-		_logger.LogInformation("GetAutoInstaller: {Version}", version);
+		_logger.LogInformation("[{Ip}] GetAutoInstaller: {Version}", HttpContext.GetClientIp(), version);
 		VersionStruct ver = new(version);
 		ModData? modData = ModData.GetModData("JALib");
 		if(modData == null || modData.BetaVersion.IsNull()) return NotFound();
