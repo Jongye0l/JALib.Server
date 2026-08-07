@@ -5,6 +5,9 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <InvariantGlobalization>true</InvariantGlobalization>
+        <AllowMissingPrunePackageData>true</AllowMissingPrunePackageData>
+        <PublishTrimmed>true</PublishTrimmed>
+        <TrimMode>link</TrimMode>
     </PropertyGroup>
 
     <ItemGroup>
