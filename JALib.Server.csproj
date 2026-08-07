@@ -8,6 +8,7 @@
         <AllowMissingPrunePackageData>true</AllowMissingPrunePackageData>
         <PublishTrimmed>true</PublishTrimmed>
         <TrimMode>link</TrimMode>
+        <MvcEnhancedModelMetadataSupport>true</MvcEnhancedModelMetadataSupport>
     </PropertyGroup>
 
     <ItemGroup>
