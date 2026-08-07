@@ -1,0 +1,53 @@
+@model JALib.Server.Views.ModApplicator.ModApplicatorEn
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JALib Mod Applicator</title>
+    <link rel="stylesheet" href="~/modApplicator/style.css">
+</head>
+<body>
+<div class="content">
+    <h1>Mod Automatic Application Guide</h1>
+    <h3>Applying mod: @Model.Info.Name @Model.Info.Version</h3>
+
+    @if(Model.Info.Redirected) {
+        <h4>The selected mod @Model.Info.Name @Model.Info.OldVersion is forced update @Model.Info.UpdateType, so you
+            have been redirected to the latest version.</h4>
+    }
+
+    @if(Model.Info.IsWindows) {
+        <p>To automatically apply the mod, you must install version <strong>'JALib 1.0.0 beta 10'</strong> or higher and
+            run it once.</p>
+        <p>If you want to install the mod manually, you can click the manual installation button.</p>
+        <p>If the automatic installer does not open, you can try again by clicking the rerun button.</p>
+        <p>If automatic installation continues to fail, please run version <strong>'JALib 1.0.0 beta 10'</strong> or
+            higher
+            again and try.</p>
+    } else {
+        <h4>Currently, automatic application of mod is supported only in Windows environments.</h4>
+    }
+
+
+    <a href="/downloadMod/@Model.Info.Name/@Model.Info.Version" class="link-button">Self Download</a>
+    @if(Model.Info.IsWindows) {
+        <a href="jalib://autoApplicator/@Model.Info.Name/@Model.Info.Version" class="link-button">Retry</a>
+    }
+    <a href="/downloadMod/JALib/latest" class="link-button">Download JALib</a>
+</div>
+
+@if(Model.Info.IsWindows) {
+    <script>
+        window.onload = function () {
+            window.location.href = `jalib://autoApplicator/@Model.Info.Name/@Model.Info.Version`;
+        };
+    </script>
+}
+
+</body>
+</html>

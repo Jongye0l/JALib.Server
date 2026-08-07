@@ -1,0 +1,51 @@
+using System.IO.Compression;
+using JALib.Server.Models;
+using Serilog;
+using Serilog.Sinks.File.GzArchive;
+using ILogger = Serilog.ILogger;
+using RollingInterval = Serilog.Sinks.FileEx.RollingInterval;
+
+namespace JALib.Server;
+
+public static class Program {
+	public static void Main(string[] args) {
+		Thread.CurrentThread.Name ??= "Main";
+		Settings.SetupInstance();
+
+		Log.Logger = CreateLogger(null);
+		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+		builder.WebHost.UseUrls("http://*:43910");
+		builder.Host.UseSerilog();
+
+		builder.Services.AddSingleton(Settings.Instance);
+		builder.Services.AddControllersWithViews();
+
+		WebApplication app = builder.Build();
+
+		app.UseStaticFiles();
+		app.MapControllers();
+
+		TokenData.LoadToken(Settings.Instance.TokenPath);
+		ModData.LoadModData();
+		ConnectOtherLib.SetupModData();
+
+		app.Run();
+	}
+
+	public static ILogger CreateLogger(string? name) {
+		return new LoggerConfiguration()
+			.Enrich.With<ThreadDisplayEnricher>()
+#if DEBUG
+			.MinimumLevel.Debug()
+#endif
+			.WriteTo.Console(
+				outputTemplate: "[{Level} {Timestamp:HH:mm:ss.fff} {Thread}]" + (name == null ? "" : $" [{name}]") + " {Message:lj}{NewLine}{Exception}"
+			)
+			.WriteTo.FileEx(
+				path: Path.Combine(Settings.Instance.LogPath, (name ?? "server") + ".log"),
+				rollingInterval: RollingInterval.Day,
+				hooks: new FileArchiveRollingHooks(CompressionLevel.SmallestSize, Path.Combine(Settings.Instance.LogPath, "archive")),
+				outputTemplate: "[{Level:u4} {Timestamp:HH:mm:ss.fff} {Thread}] {Message:lj}{NewLine}{Exception}"
+			).CreateLogger();
+	}
+}

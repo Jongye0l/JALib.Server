@@ -1,0 +1,24 @@
+# Intellij Idea
+.idea
+*.sln.DotSettings.user
+
+# Visual Studio
+.vs
+
+# Compile File
+*.dll
+bin/
+obj/
+
+# Library
+packages/
+
+# Signed Assembly
+*.snk
+
+# User Settings
+Directory.Build.props.user
+
+# Debug Files
+DebugData/
+settings.json

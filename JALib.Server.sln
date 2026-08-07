@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JALib.Server", "JALib.Server.csproj", "{D42A9A61-7FBB-4DD5-8448-D5DDB44224FF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D42A9A61-7FBB-4DD5-8448-D5DDB44224FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D42A9A61-7FBB-4DD5-8448-D5DDB44224FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D42A9A61-7FBB-4DD5-8448-D5DDB44224FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D42A9A61-7FBB-4DD5-8448-D5DDB44224FF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
