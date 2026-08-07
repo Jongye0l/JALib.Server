@@ -3,7 +3,7 @@ namespace JALib.Server.Models;
 public static class TokenData {
 	private static readonly HashSet<string> Tokens = [];
 
-	public static string Token => Tokens.First();
+	public static string? Token => Tokens.FirstOrDefault();
 
 	public static void LoadToken(string path) {
 		if(!File.Exists(path)) return;
