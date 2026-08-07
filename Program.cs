@@ -37,6 +37,9 @@ public static class Program {
 			.Enrich.With<ThreadDisplayEnricher>()
 #if DEBUG
 			.MinimumLevel.Debug()
+#else
+			.MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+			.MinimumLevel.Override("Microsoft.Hosting.Lifetime", Serilog.Events.LogEventLevel.Information)
 #endif
 			.WriteTo.Console(
 				outputTemplate: "[{Level} {Timestamp:HH:mm:ss.fff} {Thread}]" + (name == null ? "" : $" [{name}]") + " {Message:lj}{NewLine}{Exception}"
