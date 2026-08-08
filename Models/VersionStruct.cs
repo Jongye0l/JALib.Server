@@ -47,6 +47,7 @@ public struct VersionStruct : IEquatable<VersionStruct> {
 			}
 		}
 		Set(changeIndex, currentValue);
+		while(changeIndex < 4) Set(changeIndex++, -1);
 	}
 
 	public void Setup(ReadOnlySpan<byte> value) {
@@ -63,6 +64,7 @@ public struct VersionStruct : IEquatable<VersionStruct> {
 			}
 		}
 		Set(changeIndex, currentValue);
+		while(changeIndex < 4) Set(changeIndex++, -1);
 	}
 
 	public void Setup(ReadOnlySequence<byte> value) {
@@ -82,6 +84,7 @@ public struct VersionStruct : IEquatable<VersionStruct> {
 			}
 		}
 		Set(changeIndex, currentValue);
+		while(changeIndex < 4) Set(changeIndex++, -1);
 	}
 
 	public void Setup(ref Utf8JsonReader reader) {
