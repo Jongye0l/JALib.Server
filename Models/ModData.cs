@@ -9,6 +9,7 @@ namespace JALib.Server.Models;
 
 public class ModData : IJsonData {
 	private static readonly Dictionary<string, ModData> Registry = new(StringComparer.OrdinalIgnoreCase); // TODO: Add AutoCleaner
+	public static Func<ModData> Factory = () => new ModData();
 
 	public string Name = null!;
 	public VersionStruct Version = VersionStruct.Null;
@@ -29,7 +30,7 @@ public class ModData : IJsonData {
 		if(!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 		foreach(string file in Directory.GetFiles(dir)) {
 			if(file.EndsWith(".old") && File.Exists(file[..^4])) continue;
-			ModData modData = new();
+			ModData modData = Factory();
 			try {
 				byte[] buffer = File.ReadAllBytes(file);
 				Utf8JsonReader reader = new(buffer);
@@ -55,7 +56,7 @@ public class ModData : IJsonData {
 	public static ModData CreateMod(string name, JavaByteArrayDataInput input) {
 		ModData modData = GetModData(name)!;
 		if(modData == null!) {
-			modData = new ModData();
+			modData = Factory();
 			Registry[name] = modData;
 		}
 		modData.Name = name;
@@ -127,118 +128,122 @@ public class ModData : IJsonData {
 
 	public override string ToString() => Name + " ModData";
 
-	public void Load(ref Utf8JsonReader reader) {
+	public virtual void Load(ref Utf8JsonReader reader) {
 		while(reader.Read() && reader.TokenType != JsonTokenType.EndObject) {
 			if(reader.TokenType != JsonTokenType.PropertyName) continue;
 			string propertyName = reader.GetString()!;
 			reader.Read();
-			switch(propertyName) {
-				case "name":
-					Name = reader.GetString()!;
-					break;
-				case "version":
-					Version.Setup(ref reader);
-					break;
-				case "betaVersion":
-					BetaVersion.Setup(ref reader);
-					break;
-				case "forceUpdate":
-					IsForceUpdate = reader.GetBoolean();
-					break;
-				case "forceUpdateBeta":
-					IsForceUpdateBeta = reader.GetBoolean();
-					break;
-				case "betaMap":
-					Unsafe.SkipInit(out VersionStruct version);
-					while(reader.Read() && reader.TokenType != JsonTokenType.EndObject) {
-						if(reader.TokenType != JsonTokenType.PropertyName) continue;
-						if(reader.HasValueSequence) version.Setup(reader.ValueSequence);
-						else version.Setup(reader.ValueSpan);
-						reader.Read();
-						BetaMap[version] = reader.GetBoolean();
-					}
-					break;
-				case "forceUpdateHandles":
-					List<ForceUpdateHandle>? handles = null;
-					Unsafe.SkipInit(out ForceUpdateHandle handle);
-					while(reader.Read() && reader.TokenType != JsonTokenType.EndArray) {
-						if(reader.TokenType != JsonTokenType.StartObject) continue;
-						handles ??= [];
-						handle.Load(ref reader);
-						handles.Add(handle);
-					}
-					ForceUpdateHandles = handles == null ? [] : handles.ToArray();
-					break;
-				case "availableLanguages":
-					List<Language>? languages = null;
-					while(reader.Read() && reader.TokenType != JsonTokenType.EndArray) {
-						if(reader.TokenType != JsonTokenType.String) {
-							Log.Logger.Warning("Unknown token type in ModData.AvailableLanguages: {TokenType}", reader.TokenType);
-							continue;
-						}
-						if(!Enum.TryParse(reader.GetString(), out Language language)) {
-							Log.Logger.Warning("Unknown language in ModData.AvailableLanguages: {Language}", reader.GetString());
-							continue;
-						}
-						languages ??= [];
-						languages.Add(language);
-					}
-					AvailableLanguages = languages == null ? [] : languages.ToArray();
-					break;
-				case "homepage":
-					Homepage = reader.GetString();
-					break;
-				case "discord":
-					Discord = reader.GetString();
-					break;
-				case "downloadLink":
-					Utf8JsonReader readerCopy = reader;
-					string? type = null;
-					while(readerCopy.Read() && readerCopy.TokenType != JsonTokenType.EndObject) {
-						if(readerCopy.TokenType != JsonTokenType.PropertyName) continue;
-						ReadOnlySpan<byte> value = readerCopy.HasValueSequence ? readerCopy.ValueSequence.ToArray() : readerCopy.ValueSpan;
-						readerCopy.Read();
-						if(value.SequenceEqual("type"u8)) {
-							type = readerCopy.GetString();
-							break;
-						}
-						readerCopy.Skip();
-					}
-					DownloadLink = type switch {
-						null => throw new ArgumentException("DownloadLink is need Type."),
-						"github" => new GithubDownloadLink(),
-						"custom" => new CustomDownloadLink(),
-						_ => throw new ArgumentException("Unknown DownloadLink Type: " + type)
-					};
-					DownloadLink.Load(ref reader);
-					break;
-				case "gid":
-					Gid = reader.GetInt32();
-					break;
-				case "localizations":
-					while(reader.Read() && reader.TokenType != JsonTokenType.EndObject) {
-						if(reader.TokenType != JsonTokenType.PropertyName) continue;
-						string value = reader.GetString()!;
-						reader.Read();
-						Dictionary<Language, string?> dict = new();
-						while(reader.Read() && reader.TokenType != JsonTokenType.EndObject) {
-							if(reader.TokenType != JsonTokenType.PropertyName) continue;
-							if(!Enum.TryParse(reader.GetString(), out Language language)) throw new ArgumentException("Unknown Language: " + reader.GetString());
-							reader.Read();
-							dict[language] = reader.GetString();
-						}
-						Localizations[value] = dict;
-					}
-					break;
-				default:
-					Log.Logger.Warning("Unknown property in ModData: {PropertyName}({TokenType})", propertyName, reader.TokenType);
-					reader.Skip();
-					break;
-			}
+			Load(propertyName, ref reader);
 		}
 	}
 
-	public void Save(Utf8JsonWriter writer) {
+	protected virtual void Load(string propertyName, ref Utf8JsonReader reader) {
+		switch(propertyName) {
+			case "name":
+				Name = reader.GetString()!;
+				break;
+			case "version":
+				Version.Setup(ref reader);
+				break;
+			case "betaVersion":
+				BetaVersion.Setup(ref reader);
+				break;
+			case "forceUpdate":
+				IsForceUpdate = reader.GetBoolean();
+				break;
+			case "forceUpdateBeta":
+				IsForceUpdateBeta = reader.GetBoolean();
+				break;
+			case "betaMap":
+				Unsafe.SkipInit(out VersionStruct version);
+				while(reader.Read() && reader.TokenType != JsonTokenType.EndObject) {
+					if(reader.TokenType != JsonTokenType.PropertyName) continue;
+					if(reader.HasValueSequence) version.Setup(reader.ValueSequence);
+					else version.Setup(reader.ValueSpan);
+					reader.Read();
+					BetaMap[version] = reader.GetBoolean();
+				}
+				break;
+			case "forceUpdateHandles":
+				List<ForceUpdateHandle>? handles = null;
+				Unsafe.SkipInit(out ForceUpdateHandle handle);
+				while(reader.Read() && reader.TokenType != JsonTokenType.EndArray) {
+					if(reader.TokenType != JsonTokenType.StartObject) continue;
+					handles ??= [];
+					handle.Load(ref reader);
+					handles.Add(handle);
+				}
+				ForceUpdateHandles = handles == null ? [] : handles.ToArray();
+				break;
+			case "availableLanguages":
+				List<Language>? languages = null;
+				while(reader.Read() && reader.TokenType != JsonTokenType.EndArray) {
+					if(reader.TokenType != JsonTokenType.String) {
+						Log.Logger.Warning("Unknown token type in ModData.AvailableLanguages: {TokenType}", reader.TokenType);
+						continue;
+					}
+					if(!Enum.TryParse(reader.GetString(), out Language language)) {
+						Log.Logger.Warning("Unknown language in ModData.AvailableLanguages: {Language}", reader.GetString());
+						continue;
+					}
+					languages ??= [];
+					languages.Add(language);
+				}
+				AvailableLanguages = languages == null ? [] : languages.ToArray();
+				break;
+			case "homepage":
+				Homepage = reader.GetString();
+				break;
+			case "discord":
+				Discord = reader.GetString();
+				break;
+			case "downloadLink":
+				Utf8JsonReader readerCopy = reader;
+				string? type = null;
+				while(readerCopy.Read() && readerCopy.TokenType != JsonTokenType.EndObject) {
+					if(readerCopy.TokenType != JsonTokenType.PropertyName) continue;
+					ReadOnlySpan<byte> value = readerCopy.HasValueSequence ? readerCopy.ValueSequence.ToArray() : readerCopy.ValueSpan;
+					readerCopy.Read();
+					if(value.SequenceEqual("type"u8)) {
+						type = readerCopy.GetString();
+						break;
+					}
+					readerCopy.Skip();
+				}
+				DownloadLink = type switch {
+					null => throw new ArgumentException("DownloadLink is need Type."),
+					"github" => new GithubDownloadLink(),
+					"custom" => new CustomDownloadLink(),
+					_ => throw new ArgumentException("Unknown DownloadLink Type: " + type)
+				};
+				DownloadLink.Load(ref reader);
+				break;
+			case "gid":
+				Gid = reader.GetInt32();
+				break;
+			case "localizations":
+				while(reader.Read() && reader.TokenType != JsonTokenType.EndObject) {
+					if(reader.TokenType != JsonTokenType.PropertyName) continue;
+					string value = reader.GetString()!;
+					reader.Read();
+					Dictionary<Language, string?> dict = new();
+					while(reader.Read() && reader.TokenType != JsonTokenType.EndObject) {
+						if(reader.TokenType != JsonTokenType.PropertyName) continue;
+						if(!Enum.TryParse(reader.GetString(), out Language language)) throw new ArgumentException("Unknown Language: " + reader.GetString());
+						reader.Read();
+						dict[language] = reader.GetString();
+					}
+					Localizations[value] = dict;
+				}
+				break;
+			default:
+				Log.Logger.Warning("Unknown property in ModData: {PropertyName}({TokenType})", propertyName, reader.TokenType);
+				reader.Skip();
+				break;
+		}
+	}
+
+	public virtual void Save(Utf8JsonWriter writer) {
 		writer.WriteStartObject();
 		{
 			writer.WriteString("name"u8, Name);
@@ -299,6 +304,10 @@ public class ModData : IJsonData {
 			}
 			writer.WriteEndObject();
 		}
+		SaveExtra(writer);
 		writer.WriteEndObject();
+	}
+
+	protected virtual void SaveExtra(Utf8JsonWriter writer) {
 	}
 }

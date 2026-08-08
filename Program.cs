@@ -8,6 +8,9 @@ using RollingInterval = Serilog.Sinks.FileEx.RollingInterval;
 namespace JALib.Server;
 
 public static class Program {
+	public static Action<WebApplicationBuilder>? ConfigureBuilder;
+	public static Action<WebApplication>? OnReady = _ => ConnectOtherLib.SetupModData();
+
 	public static void Main(string[] args) {
 		Thread.CurrentThread.Name ??= "Main";
 		Settings.SetupInstance();
@@ -18,7 +21,9 @@ public static class Program {
 		builder.Host.UseSerilog();
 
 		builder.Services.AddSingleton(Settings.Instance);
-		builder.Services.AddControllersWithViews();
+		builder.Services.AddControllersWithViews()
+			.AddApplicationPart(typeof(Program).Assembly);
+		ConfigureBuilder?.Invoke(builder);
 
 		WebApplication app = builder.Build();
 
@@ -27,7 +32,8 @@ public static class Program {
 
 		TokenData.LoadToken(Settings.Instance.TokenPath);
 		ModData.LoadModData();
-		ConnectOtherLib.SetupModData();
+
+		OnReady?.Invoke(app);
 
 		app.Run();
 	}

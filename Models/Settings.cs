@@ -15,9 +15,9 @@ public class Settings : IJsonData {
 	public static void SetupInstance() {
 		byte[] data = File.ReadAllBytes("settings.json");
 		Utf8JsonReader reader = new(data);
-		Settings settings = new();
-		settings.Load(ref reader);
-		Instance = settings;
+		// ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
+		Instance ??= new Settings();
+		Instance.Load(ref reader);
 	}
 
 
@@ -26,40 +26,51 @@ public class Settings : IJsonData {
 			if(reader.TokenType != JsonTokenType.PropertyName) continue;
 			string propertyName = reader.GetString()!;
 			reader.Read();
-			switch(propertyName) {
-				case "logPath":
-					LogPath = reader.GetString()!;
-					break;
-				case "modDataPath":
-					ModDataPath = reader.GetString()!;
-					break;
-				case "adminManagerPath":
-					AdminManagerPath = reader.GetString()!;
-					break;
-				case "tokenPath":
-					TokenPath = reader.GetString()!;
-					break;
-				case "otherLibURL":
-					OtherLibUrl = reader.GetString()!;
-					break;
-				case "modFilePath":
-					ModFilePath = reader.GetString()!;
-					break;
-				default:
-					Log.Logger.Warning("Unknown property in Settings: {PropertyName}({TokenType})", propertyName, reader.TokenType);
-					reader.Skip();
-					break;
-			}
+			Load(propertyName, ref reader);
 		}
 	}
 
-	public void Save(Utf8JsonWriter writer) {
+	public virtual void Load(string key, ref Utf8JsonReader reader) {
+		switch(key) {
+			case "logPath":
+			case nameof(LogPath):
+				LogPath = reader.GetString()!;
+				break;
+			case "modDataPath":
+			case nameof(ModDataPath):
+				ModDataPath = reader.GetString()!;
+				break;
+			case "adminManagerPath":
+			case nameof(AdminManagerPath):
+				AdminManagerPath = reader.GetString()!;
+				break;
+			case "tokenPath":
+			case nameof(TokenPath):
+				TokenPath = reader.GetString()!;
+				break;
+			case "otherLibURL":
+			case nameof(OtherLibUrl):
+				OtherLibUrl = reader.GetString()!;
+				if(!OtherLibUrl.EndsWith('/')) OtherLibUrl += '/';
+				break;
+			case "modFilePath":
+			case nameof(ModFilePath):
+				ModFilePath = reader.GetString()!;
+				break;
+			default:
+				Log.Logger.Warning("Unknown property in Settings: {PropertyName}({TokenType})", key, reader.TokenType);
+				reader.Skip();
+				break;
+		}
+	}
+
+	public virtual void Save(Utf8JsonWriter writer) {
 		writer.WriteStartObject();
 		writer.WriteString(nameof(LogPath), LogPath);
 		writer.WriteString(nameof(ModDataPath), ModDataPath);
 		writer.WriteString(nameof(AdminManagerPath), AdminManagerPath);
 		writer.WriteString(nameof(TokenPath), TokenPath);
-		writer.WriteString("otherLibURL", OtherLibUrl);
+		writer.WriteString(nameof(OtherLibUrl), OtherLibUrl);
 		writer.WriteString(nameof(ModFilePath), ModFilePath);
 		writer.WriteEndObject();
 	}
