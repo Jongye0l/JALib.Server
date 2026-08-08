@@ -13,7 +13,7 @@ public class GithubDownloadLink(string modName) : DownloadLink {
 	}
 
 	public override string GetLink(VersionStruct version) => "https://github.com/Jongye0l/" + ModName + "/releases/download/v" + version + "/" + ModName + ".zip";
-	public string GetSourceLink(Version version) => "https://github.com/Jongye0l/" + ModName + "/tree/v" + version;
+	public string GetSourceLink(VersionStruct version) => "https://github.com/Jongye0l/" + ModName + "/tree/v" + version;
 
 	public override void WriteTo(JavaByteArrayDataOutput output) {
 		output.WriteByte(0);
