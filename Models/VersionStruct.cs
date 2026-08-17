@@ -46,7 +46,7 @@ public struct VersionStruct : IEquatable<VersionStruct> {
 				currentValue = -1;
 			}
 		}
-		Set(changeIndex, currentValue);
+		Set(changeIndex++, currentValue);
 		while(changeIndex < 4) Set(changeIndex++, -1);
 	}
 
@@ -63,7 +63,7 @@ public struct VersionStruct : IEquatable<VersionStruct> {
 				currentValue = -1;
 			}
 		}
-		Set(changeIndex, currentValue);
+		Set(changeIndex++, currentValue);
 		while(changeIndex < 4) Set(changeIndex++, -1);
 	}
 
@@ -83,7 +83,7 @@ public struct VersionStruct : IEquatable<VersionStruct> {
 				}
 			}
 		}
-		Set(changeIndex, currentValue);
+		Set(changeIndex++, currentValue);
 		while(changeIndex < 4) Set(changeIndex++, -1);
 	}
 

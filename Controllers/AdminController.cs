@@ -19,6 +19,7 @@ public class AdminController(ILogger<AdminController> logger) : ControllerBase {
 
 		using MemoryStream ms = new();
 		await Request.Body.CopyToAsync(ms);
+		ms.Position = 0;
 		await using GZipStream gZipStream = new(ms, CompressionMode.Decompress);
 
 		using JavaByteArrayDataInput input = new(gZipStream);
@@ -35,8 +36,9 @@ public class AdminController(ILogger<AdminController> logger) : ControllerBase {
 	public async Task<IActionResult> ChangeModData() {
 		if(!CheckPermission()) return Unauthorized();
 
-		using var ms = new MemoryStream();
+		using MemoryStream ms = new();
 		await Request.Body.CopyToAsync(ms);
+		ms.Position = 0;
 		await using GZipStream gZipStream = new(ms, CompressionMode.Decompress);
 
 		using JavaByteArrayDataInput input = new(gZipStream);
