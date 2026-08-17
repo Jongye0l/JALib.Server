@@ -12,13 +12,13 @@ public class ConnectOtherLib {
 	private static readonly HttpClient Client = new() {
 		DefaultRequestHeaders = {
 			{ "User-Agent", "JALib-Server/" + typeof(ConnectOtherLib).Assembly.GetName().Version + " (X11; Linux x86_64)" },
-			{ "token", TokenData.Token }
+			{ "Authorization", "Bearer " + TokenData.Token }
 		}
 	};
 
 	public static void RefreshToken() {
-		Client.DefaultRequestHeaders.Remove("token");
-		Client.DefaultRequestHeaders.Add("token", TokenData.Token);
+		Client.DefaultRequestHeaders.Remove("Authorization");
+		Client.DefaultRequestHeaders.Add("Authorization", "Bearer " + TokenData.Token);
 	}
 
 	public static async void AddModData(ModData modData) {
