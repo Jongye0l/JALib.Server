@@ -155,7 +155,7 @@ public class JALibController : ControllerBase {
 		ModData? modData = ModData.GetModData("JALib");
 		if(modData == null || modData.BetaVersion.IsNull()) return NotFound();
 
-		if(modData.BetaVersion.IsUpper(ver)) {
+		if(ver.IsUpper(modData.BetaVersion)) {
 			return DownloadMod("JALib", modData.BetaVersion.ToString());
 		}
 		return StatusCode(304);
